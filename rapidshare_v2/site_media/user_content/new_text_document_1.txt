@@ -1,0 +1,8 @@
+C:\opencv\build\include;C:\opencv\build\include\opencv;C:\opencv\build\include\opencv2;$(IncludePath)
+
+C:\opencv\build\lib;C:\opencv\build\lib\Debug;$(LibraryPath)
+
+opencv_core243d.lib;opencv_highgui243d.lib;opencv_video243d.lib;opencv_ml243d.lib;opencv_legacy243d.lib;opencv_imgproc243d.lib;opencv_calib3d243d.lib;%(AdditionalDependencies)
+
+
+cv.lib;cxcore.lib;highgui.lib;%(AdditionalDependencies)

@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block main %}
+<p>Poniżej znajduje się lista twoich plików</p>
+<div>
+	<table border="1">
+		<tr>
+			<td>Nazwa pliku</td>
+			<td>Link do ściągnięcia</td>
+			<td>Link do usnięcia</td>
+		</tr>
+		{% for file in userFiles %}
+		<tr>
+			<td><a href="/more/{{file.code}}">{{file.name}}</a></td>
+			<td><a href="/">Ściągnij</a></td>
+			<td><a href="/delete/{{file.code}}">Usuń</a></td>
+		</tr>
+
+		{% endfor %}
+	</table>
+
+	<p>
+		<a href="/dodaj">Dodaj kolejny</a>
+	</p>
+</div>
+{% endblock %}

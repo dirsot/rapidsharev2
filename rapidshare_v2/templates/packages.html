@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block main %}
+<div>
+	<p>Tutaj możesz zapoznać się z pakietami dostępnymi na portalu</p>
+	<table border="1">
+		<tr>
+			<td>Nazwa pakietu</td>
+			<td>Ilość plików</td>
+			<td>Maksymalna wielkość pliku(MB)</td>
+			<td>Łączna wielkość wszystkich plików</td>
+			<td>Pliki usuwane po 24h</td>
+			<td>Koszt</td>
+		</tr>
+		<tr>
+			<td>Niezalogowany</td>
+			<td>10</td>
+			<td>1</td>
+			<td>10</td>
+			<td>Tak</td>
+			<td>Darmowy</td>
+		</tr>
+		<tr>
+			<td>Zalogowany</td>
+			<td>10</td>
+			<td>1</td>
+			<td>10</td>
+			<td>Nie</td>
+			<td>Darmowy</td>
+		</tr>
+		<tr>
+			<td>Rekrut</td>
+			<td>30</td>
+			<td>10</td>
+			<td>25</td>
+			<td>Nie</td>
+			<td>Darmowy</td>
+		</tr>
+		<tr>
+			<td>Major</td>
+			<td>50</td>
+			<td>25</td>
+			<td>100</td>
+			<td>Nie</td>
+			<td>Darmowy</td>
+		</tr>
+		<tr>
+			<td>Generał</td>
+			<td>100</td>
+			<td>100</td>
+			<td>1000</td>
+			<td>Nie</td>
+			<td>Darmowy</td>
+		</tr>
+	</table>
+
+	<p>
+		Dodatkowo zarejestrowany uzytkownik ma mozliwość ustalenia widoczności
+		pliku.</br> 1.Plik prywatny</br> 2.Plik dla grupy znajomych</br> 3.Plik dla osób z
+		linkiem</br>
+	</p>
+</div>
+{% endblock %}

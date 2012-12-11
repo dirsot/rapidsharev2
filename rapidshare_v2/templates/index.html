@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block main %}
+<div>
+	{% if user.is_authenticated %}
+
+	<p> Twoje konto pozwala ci na wysłanie maksymalnie plików o rozmiarze do 
+
+	{% if perms.files.all_app_to_1000 %} 1000
+	{% else %}{% if perms.files.all_app_to_100 %} 100
+	{% else %}{% if perms.files.all_app_to_25 %} 25
+	{% else %} 10 
+	{% endif %}{% endif %}{% endif %} MB 
+	</p>
+	<p> Wysyłany plik nie może byc większy niż 
+
+	{% if perms.files.each_up_to_100 %} 100
+	{% else %}{% if perms.files.each_up_to_25 %} 25
+	{% else %}{% if perms.files.each_up_to_10 %} 10
+	{% else %} 1 
+	{% endif %}{% endif %}{% endif %} MB 
+	</p>
+	
+	<p>Aby zwiększyć limity <a href="/pakiety">powiększ konto </a></p>
+
+	{% else %}
+	<p>Możesz wysłać 10 pliki łącznie do 10MB</p>
+	<p>Każdy musi być mniejszy niż 1MB</p>
+	<p>Zostaną one usunięte w ciągu 24h, jeśli chcesz je zachować na dłużej załóż konto</p>
+	{% endif %}
+	<p><a href="/pliki">Lista plików</a></p>
+</div>
+{% endblock %}

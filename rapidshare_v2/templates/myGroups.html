@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block main %}
+<div>
+	<p>Poniżej znajduje się lista twoich grup znajomych</p>
+
+	<table border="1">
+		<tr>
+			<td>Nazwa grupy</td>
+			<td>Opis</td>
+			<td></td>
+			<td></td>
+		</tr>
+		{% for group in userGroups %}
+		<tr>
+			<td>{{group.name}}</td>
+			<td>{{group.description}}</td>
+			<td><a href="/grupy/{{group.id}}">Edytuj uczestników</a></td>
+			<td><a href="/deleteGroup/{{group.id}}">Usuń</a></td>
+		</tr>
+
+		{% endfor %}
+	</table>
+
+	<p>Poniżej możesz dodać nową grupę</p>
+	<form action="#" method="post" enctype="multipart/form-data">
+		{% csrf_token %} {{ form.as_p }} <input type="submit"
+			value="Dodaj plik" />
+	</form>
+</div>
+{% endblock %}

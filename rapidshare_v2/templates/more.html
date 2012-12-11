@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block main %}
+<div>
+	<script>
+		window.fbAsyncInit = function() {
+			FB.init({
+				appId : '436452809712012', // App ID
+				channelUrl : 'www.wp.pl', // Channel File
+				status : true, // check login status
+				cookie : true, // enable cookies to allow the server to access the session
+				xfbml : true
+			// parse XFBML
+			});
+		};
+
+		(function(d) {
+			var js, id = 'facebook-jssdk', ref = d
+					.getElementsByTagName('script')[0];
+			if (d.getElementById(id)) {
+				return;
+			}
+			js = d.createElement('script');
+			js.id = id;
+			js.async = true;
+			js.src = "http://connect.facebook.net/en_US/all.js";
+			ref.parentNode.insertBefore(js, ref);
+		}(document));
+
+		(function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id))
+				return;
+			js = d.createElement(s);
+			js.id = id;
+			js.src = "//connect.facebook.net/pl_PL/all.js#xfbml=1&appId=436452809712012";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+	</script>
+
+	<p>Plik {{userFile.name}}</p>
+	{% if not userFile.owner %} Plik zostanie usunięty {% endif%}
+	<p>
+		<iframe
+			src="https://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fneolution.pl/areas&amp;send=false&amp;layout=standard&amp;width=450&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=20"
+			scrolling="no" frameborder="0"
+			style="border: none; overflow: hidden; width: 450px; height: 80px;"
+			allowTransparency="true"></iframe>
+	</p>
+
+	<div style="float: left; width: 100%" class="fb-comments"
+		data-href="http://wp.pl/post/{{node.id}}" data-num-posts="2"
+		data-width="340" data-height="670"></div>
+</div>
+{% endblock %}
