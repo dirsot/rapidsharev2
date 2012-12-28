@@ -7,12 +7,12 @@ import os
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
-from rapidshare_v2.settings import USER_CONTENT_ROOT, MEDIA_ROOT, FILE_PRIVATE
+from rapidshare_v2.settings import USER_CONTENT_ROOT, MEDIA_ROOT, FILE_PRIVATE, FILE_LINK, FILE_GROUP
 import logging
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import logout_then_login
-from rapidshare_v2.models import File, UserGroup
+from rapidshare_v2.models import File, UserGroup, UserGroupAssignation
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from captcha.fields import ReCaptchaField
@@ -27,8 +27,8 @@ class ContactForm(forms.Form):
 	Opis = forms.CharField(required=False)
 	Plik = forms.FileField(required=True)
 	Widocznosc = forms.ChoiceField(choices=WIDOCZNOSC_PLIKOW, initial='0', required=True)
-	Grupy = forms.ModelMultipleChoiceField(queryset=UserGroup.objects.all(), widget=FilteredSelectMultiple("verbose name", is_stacked=False,attrs={'rows':'2'}))
-	recaptcha_challenge_field = ReCaptchaField(error_messages={'captcha_invalid': _('Captcha nie jest poprawna')})
+	Grupy = forms.ModelMultipleChoiceField(required=False, queryset=UserGroup.objects.all(), widget=FilteredSelectMultiple("verbose name", is_stacked=False, attrs={'rows':'2'}))
+	# recaptcha_challenge_field = ReCaptchaField(error_messages={'captcha_invalid': _('Captcha nie jest poprawna')})
 	
 class GroupForm(forms.Form):
 	Nazwa = forms.CharField(max_length=100, required=True)
@@ -44,10 +44,11 @@ def addFile(request):
 		
 		form = ContactForm(request.POST, request.FILES)
 		if form.is_valid():
-			#nazwa = form.cleaned_data['Nazwa']
+			# nazwa = form.cleaned_data['Nazwa']
 			opis = form.cleaned_data['Opis']
 			widocznosc = form.cleaned_data['Widocznosc']
 			plik = request.FILES['Plik']
+			# groups = request.cleaned_data['Grupy']
 			
 			if(request.user.is_authenticated()):
 				user_file = File(owner=request.user, name=plik._get_name(), despription=opis, file=plik, code=getFileCode(), visibility=widocznosc)
@@ -83,6 +84,20 @@ def delete(request, fileCode):
 def more(request, fileCode):
 	try:
 		userFile = File.objects.get(code=fileCode)
+		if request.user.is_anonymous():
+			if userFile.visibility == FILE_LINK:
+				pass  # jest ok
+			else:
+				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
+			
+		if userFile.visibility == FILE_GROUP and userFile.owner != request.user:
+			uga = UserGroupAssignation.objects.filter(group__in=userFile.groups.all()).filter(owner=request.user)
+			if not uga:
+				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
+			else:
+				pass
+		if userFile.visibility == FILE_LINK:
+			pass  # jest ok
 		if userFile.visibility == FILE_PRIVATE:
 			if userFile.owner != request.user:
 				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
@@ -127,10 +142,20 @@ def myGroups(request):
 		
 	return render_to_response('myGroups.html', {'userGroups':userGroups, 'form': form}, context_instance=RequestContext(request))
 
-def inGroup(request,groupId):
-	inGroup = UserGroup.objects.filter(owner=request.user)
+def inGroup(request, groupId):
+	group = UserGroup.objects.get(id=groupId)
+	uga = UserGroupAssignation.objects.filter(group=group)
+	return render_to_response('inGroup.html', {'inGroup':uga}, context_instance=RequestContext(request))
+
+def deleteFromGroup(request, groupId, userId):
 	
-	return render_to_response('inGroup.html', {'inGroup':inGroup}, context_instance=RequestContext(request))
+	
+	group = UserGroup.objects.get(id=groupId)
+	uga = UserGroupAssignation.objects.filter(group=group)
+	
+	msg = "Użytkonwik został usunięty z grupy"
+	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg}, context_instance=RequestContext(request))
+
 
 def deleteMyGroup(request, groupId):
 	try:

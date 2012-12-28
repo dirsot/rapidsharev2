@@ -1,20 +1,20 @@
 {% extends "base.html" %} {% block main %}
 <div>
+	{% if msg %}
+	<div style="color: green">{{msg}}</div>
+	{% endif %}
+
 	<p>Poniżej znajduje się lista użytkowników w grupie</p>
 
 	<table border="1">
 		<tr>
-			<td>Nazwa grupy</td>
-			<td>Opis</td>
-			<td></td>
-			<td></td>
+			<td>Nazwa</td>
+			<td>Usuń z grupy</td>
 		</tr>
-		{% for group in userGroups %}
+		{% for user in inGroup %}
 		<tr>
-			<td>{{group.name}}</td>
-			<td>{{group.description}}</td>
-			<td><a href="/">Edytuj uczestników</a></td>
-			<td><a href="/deleteGroup/{{group.id}}">Usuń</a></td>
+			<td>{{user.owner}}</td>
+			<td><a href="/usunZGrupy/{{user.group.id}}/{{user.owner.id}}">Usuń</a></td>
 		</tr>
 
 		{% endfor %}

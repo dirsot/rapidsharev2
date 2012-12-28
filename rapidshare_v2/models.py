@@ -33,7 +33,7 @@ class UserGroup(models.Model):
 
     description = models.CharField(max_length=255, verbose_name='opis')
     name = models.CharField(max_length=255, verbose_name='nazwa grupy')
-    owner = models.ForeignKey(User, blank=True, null=True,verbose_name='właściciel grupy')
+    owner = models.ForeignKey(User, blank=True, null=True, verbose_name='właściciel grupy')
 
     def __str__(self):
         return self.name
@@ -41,13 +41,9 @@ class UserGroup(models.Model):
         return self.name
     
 class UserGroupAssignation(models.Model):
-    owner = models.ForeignKey(User, blank=False, null=False,verbose_name='użytkownik')
-    group = models.ForeignKey(UserGroup, blank=False, null=False,verbose_name='grupa')
+    owner = models.ForeignKey(User, blank=False, null=False, verbose_name='użytkownik')
+    group = models.ForeignKey(UserGroup, blank=False, null=False, verbose_name='grupa')
     
-    def __str__(self):
-        return self.name
-    def __unicode__(self):
-        return self.name
     
 class File(models.Model):
     description = "Tabela dla plików"
@@ -60,6 +56,7 @@ class File(models.Model):
     owner = models.ForeignKey(User, blank=True, null=True)
     ip = models.IPAddressField(null=True, blank=True, default=None)
     visibility = models.IntegerField(null=True, blank=True, default=0)
+    groups = models.ManyToManyField(UserGroup, verbose_name=_('groups'), blank=True,);
     
     class Meta:
         verbose_name = "Plik"
