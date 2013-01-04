@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from django import forms
 from captcha.fields import ReCaptchaField
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.auth.models import User
 
 logger = logging.getLogger('rapidshare.views')
 CHAR_SET = string.ascii_uppercase + string.digits
@@ -50,8 +51,13 @@ def addFile(request):
 			plik = request.FILES['Plik']
 			# groups = request.cleaned_data['Grupy']
 			
+			if not canUpload(request, plik):
+				return render_to_response('error.html', {'msg':'Twoje konto nie pozwala na wysłanie tego pliku'}, context_instance=RequestContext(request))
+			
 			if(request.user.is_authenticated()):
 				user_file = File(owner=request.user, name=plik._get_name(), despription=opis, file=plik, code=getFileCode(), visibility=widocznosc)
+				user_file.save()
+				user_file.groups = form.cleaned_data['Grupy']
 				user_file.save()
 			else:
 				user_ip = get_client_ip(request)
@@ -64,6 +70,24 @@ def addFile(request):
 	else:
 		form = ContactForm()
 	return render_to_response('addFile.html', {'form': form}, context_instance=RequestContext(request))
+
+def canUpload(request, plik):
+	MB = 1024 * 1024
+	if(request.user.is_authenticated()):
+		if request.user.has_perm('each_up_to_100'):
+			if plik.size < 100 * MB:
+				return True 
+		elif request.user.has_perm('each_up_to_25'):
+			if plik.size < 25 * MB:
+				return True 
+		elif request.user.has_perm('each_up_to_10'):
+			if plik.size < 10 * MB:
+				return True 	
+		elif plik.size > MB:
+			return False
+		else: 
+			return True
+		
 
 def getFileCode():
 	return ''.join(random.sample(CHAR_SET, 9))
@@ -145,16 +169,30 @@ def myGroups(request):
 def inGroup(request, groupId):
 	group = UserGroup.objects.get(id=groupId)
 	uga = UserGroupAssignation.objects.filter(group=group)
-	return render_to_response('inGroup.html', {'inGroup':uga}, context_instance=RequestContext(request))
+	users = User.objects.all()
+	return render_to_response('inGroup.html', {'inGroup':uga, 'users':users, 'groupId':groupId}, context_instance=RequestContext(request))
+
+def addToGroup(request, groupId, userId):
+	user = User.objects.get(id=userId)
+	group = UserGroup.objects.get(id=groupId)
+	uga = UserGroupAssignation(group=group, owner=user)
+	uga.save()
+	uga = UserGroupAssignation.objects.filter(group=group)
+	users = User.objects.all()
+	
+	msg = "Użytkonwik został dodany do grupy"
+	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg, 'users':users, 'groupId':groupId}, context_instance=RequestContext(request))
+
 
 def deleteFromGroup(request, groupId, userId):
 	
-	
 	group = UserGroup.objects.get(id=groupId)
+	user = User.objects.get(id=userId)
+	uga = UserGroupAssignation.objects.filter(group=group).filter(owner=user).delete()
 	uga = UserGroupAssignation.objects.filter(group=group)
-	
+	users = User.objects.all()
 	msg = "Użytkonwik został usunięty z grupy"
-	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg}, context_instance=RequestContext(request))
+	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg, 'users':users, 'groupId':groupId}, context_instance=RequestContext(request))
 
 
 def deleteMyGroup(request, groupId):

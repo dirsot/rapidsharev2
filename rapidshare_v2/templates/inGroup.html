@@ -19,5 +19,21 @@
 
 		{% endfor %}
 	</table>
+	<p>Poniżej znajduje się lista użytkowników któych możesz dodać do obecnej grupy</p>
+
+	<table border="1">
+		<tr>
+			<td>Nazwa</td>
+			<td>Dodaj do grupy</td>
+		</tr>
+		{% for user in users %}
+		<tr>
+			<td>{{user}}</td>
+			<td><a href="/dodajDoGrupy/{{groupId}}/{{user.id}}">Dodaj</a></td>
+		</tr>
+
+		{% endfor %}
+	</table>
+
 </div>
 {% endblock %}
