@@ -82,7 +82,7 @@ class Downloads(models.Model):
     ip = models.IPAddressField(null=True, blank=True, default=None)
     file = models.ForeignKey(File, blank=False, null=False, verbose_name='plik')
     date = models.DateTimeField(_('download date'), default=datetime.datetime.now)
-    
+
     class Meta:
         verbose_name = "Downloads"
         verbose_name_plural = "Downloads"
