@@ -37,6 +37,19 @@
 	</script>
 
 	<p>Plik {{userFile.name}}</p>
+	
+	<p> Plik jest widoczny w trybie:
+
+	{% if userFile.visibility == 0 %} Domyślnym
+	{% else %}{% if userFile.visibility == 1 %} Prywatnym
+	{% else %}{% if userFile.visibility == 2 %} Dla grup:
+	{% for group in userFile.groups.all%}
+	<a href="/grupy/{{group.id}}">{{group}}</a>
+	{% endfor %}
+	{% else %} Dla osób z linkiem
+	{% endif %}{% endif %}{% endif %}
+	</p>
+	
 	{% if not userFile.owner %} Plik zostanie usunięty {% endif%}
 	<p>
 		<iframe

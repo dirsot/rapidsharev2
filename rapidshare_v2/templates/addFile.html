@@ -1,7 +1,13 @@
 {% extends "base.html" %} {% block main %}
 <div class="addFileFragment">
+<script>
+	function checkSize(){
+		//alert(4);
+	}
+</script>
+
 	<form action="#" method="post" enctype="multipart/form-data" >
-		{% csrf_token %} {{ form.as_p }} <input type="submit" value="Dodaj plik" />
+		{% csrf_token %} {{ form.as_p }} <input type="submit" value="Dodaj plik" onclick="checkSize();"/>
 	</form>
 </div>
 {% endblock %}

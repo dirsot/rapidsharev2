@@ -15,7 +15,6 @@ class Team(models.Model):
     about = models.TextField(verbose_name="Cos o sobie", blank=True)
     photo = models.ImageField(upload_to='photos', verbose_name='Zdjecie')
     slug = models.SlugField(max_length=255, unique=True, verbose_name='Slug')
-
         
     class Meta:
         verbose_name = "Zesp�l i inni"
@@ -43,7 +42,6 @@ class UserGroup(models.Model):
 class UserGroupAssignation(models.Model):
     owner = models.ForeignKey(User, blank=False, null=False, verbose_name='użytkownik')
     group = models.ForeignKey(UserGroup, blank=False, null=False, verbose_name='grupa')
-    
     
 class File(models.Model):
     description = "Tabela dla plików"
@@ -78,3 +76,14 @@ class File(models.Model):
         return self.name
     def __unicode__(self):
         return self.name
+
+class Downloads(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True)  
+    ip = models.IPAddressField(null=True, blank=True, default=None)
+    file = models.ForeignKey(File, blank=False, null=False, verbose_name='plik')
+    date = models.DateTimeField(_('download date'), default=datetime.datetime.now)
+    
+    class Meta:
+        verbose_name = "Downloads"
+        verbose_name_plural = "Downloads"
+        ordering = ('date',)

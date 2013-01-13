@@ -7,12 +7,12 @@ import os
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
-from rapidshare_v2.settings import USER_CONTENT_ROOT, MEDIA_ROOT, FILE_PRIVATE, FILE_LINK, FILE_GROUP
+from rapidshare_v2.settings import USER_CONTENT_ROOT, MEDIA_ROOT, FILE_PRIVATE, FILE_LINK, FILE_GROUP, FILE_DEFAULT, FILES_PER_DAY
 import logging
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import logout_then_login
-from rapidshare_v2.models import File, UserGroup, UserGroupAssignation
+from rapidshare_v2.models import File, UserGroup, UserGroupAssignation, Downloads
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from captcha.fields import ReCaptchaField
@@ -64,7 +64,7 @@ def addFile(request):
 				user_files = File.objects.filter(ip=user_ip)
 				if len(user_files) >= 4:
 					return render_to_response('error.html', {'msg':'Nie zalogowany, max 4'}, context_instance=RequestContext(request))
-				user_file = File(ip=user_ip, name=plik._get_name(), despription="", file=plik, code=getFileCode())
+				user_file = File(ip=user_ip, name=plik._get_name(), despription="", file=plik, code=getFileCode(), visibility=FILE_DEFAULT)
 				user_file.save()
 			return HttpResponseRedirect('/pliki')
 	else:
@@ -87,6 +87,11 @@ def canUpload(request, plik):
 			return False
 		else: 
 			return True
+	else:
+		if plik.size > MB:
+			return False
+		else: 
+			return True
 		
 
 def getFileCode():
@@ -105,6 +110,40 @@ def delete(request, fileCode):
 		msg = "Brak pliku na serwerze"
 	return render_to_response('delete.html', {'msg':msg}, context_instance=RequestContext(request))
 
+def download(request, fileCode):
+	user = request.user
+	ip = get_client_ip(request)
+	try:
+		userFile = File.objects.get(code=fileCode)
+		if request.user.is_anonymous():
+			user = None
+			if userFile.visibility == FILE_LINK or userFile.visibility == FILE_DEFAULT :
+				downloads = Downloads.objects.filter(ip=ip)
+				if len(downloads) > FILES_PER_DAY:
+					return render_to_response('error.html', {'msg':'Limit ściągnięć przekroczony'}, context_instance=RequestContext(request))
+			else:
+				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
+		else:
+			ip = None
+				
+		if userFile.visibility == FILE_GROUP and userFile.owner != request.user:
+			uga = UserGroupAssignation.objects.filter(group__in=userFile.groups.all()).filter(owner=request.user)
+			if not uga:
+				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
+			else:
+				pass
+		if userFile.visibility == FILE_LINK or userFile.visibility == FILE_DEFAULT:
+			pass  # jest ok
+		if userFile.visibility == FILE_PRIVATE:
+			if userFile.owner != request.user:
+				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
+	except File.DoesNotExist:
+		return render_to_response('error.html', {'msg':''}, context_instance=RequestContext(request))
+	
+	download = Downloads(user=user, ip=ip, file=userFile)
+	download.save()
+	return render_to_response('more.html', {'userFile':userFile}, context_instance=RequestContext(request))
+	
 def more(request, fileCode):
 	try:
 		userFile = File.objects.get(code=fileCode)
