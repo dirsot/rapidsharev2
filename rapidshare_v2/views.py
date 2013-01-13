@@ -29,7 +29,7 @@ class ContactForm(forms.Form):
 	Plik = forms.FileField(required=True)
 	Widocznosc = forms.ChoiceField(choices=WIDOCZNOSC_PLIKOW, initial='0', required=True)
 	Grupy = forms.ModelMultipleChoiceField(required=False, queryset=UserGroup.objects.all(), widget=FilteredSelectMultiple("verbose name", is_stacked=False, attrs={'rows':'2'}))
-	# recaptcha_challenge_field = ReCaptchaField(error_messages={'captcha_invalid': _('Captcha nie jest poprawna')})
+	recaptcha_challenge_field = ReCaptchaField(error_messages={'captcha_invalid': _('Captcha nie jest poprawna')})
 	
 class GroupForm(forms.Form):
 	Nazwa = forms.CharField(max_length=100, required=True)
@@ -40,8 +40,10 @@ def home(request):
 	return render_to_response('index.html', {}, context_instance=RequestContext(request))
 
 def addFile(request):
+	max_size = maxSize(request)
 	if request.method == 'POST':
 		logger.debug('Addind file')
+		
 		
 		form = ContactForm(request.POST, request.FILES)
 		if form.is_valid():
@@ -62,15 +64,29 @@ def addFile(request):
 			else:
 				user_ip = get_client_ip(request)
 				user_files = File.objects.filter(ip=user_ip)
-				if len(user_files) >= 4:
-					return render_to_response('error.html', {'msg':'Nie zalogowany, max 4'}, context_instance=RequestContext(request))
+				if len(user_files) >= 10:
+					return render_to_response('error.html', {'msg':'Nie zalogowany, max 10'}, context_instance=RequestContext(request))
 				user_file = File(ip=user_ip, name=plik._get_name(), despription="", file=plik, code=getFileCode(), visibility=FILE_DEFAULT)
 				user_file.save()
 			return HttpResponseRedirect('/pliki')
 	else:
 		form = ContactForm()
-	return render_to_response('addFile.html', {'form': form}, context_instance=RequestContext(request))
+	return render_to_response('addFile.html', {'form': form,'maxSize':max_size}, context_instance=RequestContext(request))
 
+def maxSize(request):
+	MB = 1024 * 1024
+	if(request.user.is_authenticated()):
+		if request.user.has_perm('each_up_to_100'):
+			return 100*MB
+		elif request.user.has_perm('each_up_to_25'):
+			return 25*MB
+		elif request.user.has_perm('each_up_to_10'):
+			return 10*MB
+		else: 
+			return 1*MB
+	else:
+		return 1*MB
+		
 def canUpload(request, plik):
 	MB = 1024 * 1024
 	if(request.user.is_authenticated()):
@@ -142,7 +158,7 @@ def download(request, fileCode):
 	
 	download = Downloads(user=user, ip=ip, file=userFile)
 	download.save()
-	return render_to_response('more.html', {'userFile':userFile}, context_instance=RequestContext(request))
+	return HttpResponseRedirect('/files/'+userFile.file.name)
 	
 def more(request, fileCode):
 	try:
@@ -209,7 +225,15 @@ def inGroup(request, groupId):
 	group = UserGroup.objects.get(id=groupId)
 	uga = UserGroupAssignation.objects.filter(group=group)
 	users = User.objects.all()
-	return render_to_response('inGroup.html', {'inGroup':uga, 'users':users, 'groupId':groupId}, context_instance=RequestContext(request))
+	userList = list(users)
+	for user in userList:
+		for user2 in uga:
+			if user == user2.owner:
+				try:
+					userList.remove(user)
+				except:
+					pass
+	return render_to_response('inGroup.html', {'inGroup':uga, 'users':userList, 'groupId':groupId}, context_instance=RequestContext(request))
 
 def addToGroup(request, groupId, userId):
 	user = User.objects.get(id=userId)
@@ -218,9 +242,16 @@ def addToGroup(request, groupId, userId):
 	uga.save()
 	uga = UserGroupAssignation.objects.filter(group=group)
 	users = User.objects.all()
-	
+	userList = list(users)
+	for user in userList:
+		for user2 in uga:
+			if user == user2.owner:
+				try:
+					userList.remove(user)
+				except:
+					pass
 	msg = "Użytkonwik został dodany do grupy"
-	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg, 'users':users, 'groupId':groupId}, context_instance=RequestContext(request))
+	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg, 'users':userList, 'groupId':groupId}, context_instance=RequestContext(request))
 
 
 def deleteFromGroup(request, groupId, userId):
@@ -230,8 +261,16 @@ def deleteFromGroup(request, groupId, userId):
 	uga = UserGroupAssignation.objects.filter(group=group).filter(owner=user).delete()
 	uga = UserGroupAssignation.objects.filter(group=group)
 	users = User.objects.all()
+	userList = list(users)
+	for user in userList:
+		for user2 in uga:
+			if user == user2.owner:
+				try:
+					userList.remove(user)
+				except:
+					pass
 	msg = "Użytkonwik został usunięty z grupy"
-	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg, 'users':users, 'groupId':groupId}, context_instance=RequestContext(request))
+	return render_to_response('inGroup.html', {'inGroup':uga, 'msg':msg, 'users':userList, 'groupId':groupId}, context_instance=RequestContext(request))
 
 
 def deleteMyGroup(request, groupId):

@@ -76,6 +76,8 @@ class File(models.Model):
         return self.name
     def __unicode__(self):
         return self.name
+    def get_absolute_url(self):
+        return "/files/%i/" % file.name
 
 class Downloads(models.Model):
     user = models.ForeignKey(User, blank=True, null=True)  

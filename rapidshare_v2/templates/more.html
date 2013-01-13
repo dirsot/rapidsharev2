@@ -53,14 +53,14 @@
 	{% if not userFile.owner %} Plik zostanie usunięty {% endif%}
 	<p>
 		<iframe
-			src="https://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fneolution.pl/areas&amp;send=false&amp;layout=standard&amp;width=450&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=20"
+			src="https://www.facebook.com/plugins/like.php?href=http://dirsot.alwaysdata.net/more/{{userFile.code}}&amp;send=false&amp;layout=standard&amp;width=650&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=20"
 			scrolling="no" frameborder="0"
-			style="border: none; overflow: hidden; width: 450px; height: 80px;"
+			style="border: none; overflow: hidden; width: 650px; height: 80px;"
 			allowTransparency="true"></iframe>
 	</p>
 
 	<div style="float: left; width: 100%" class="fb-comments"
 		data-href="http://wp.pl/post/{{node.id}}" data-num-posts="2"
-		data-width="340" data-height="670"></div>
+		data-width="640" data-height="670"></div>
 </div>
 {% endblock %}

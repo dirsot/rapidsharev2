@@ -2,12 +2,19 @@
 <div class="addFileFragment">
 <script>
 	function checkSize(){
-		//alert(4);
-	}
-</script>
+		var file = document.getElementById('id_Plik').files[0];
+		if(file && file.size > {{maxSize}}) {
+			document.getElementById('sizeError').innerHTML = "Twój obecny pakiet nie pozwala na wysłani pliku o takiej wielkości. Jeśli zmienisz js, kolejna walidacja wychwyci ten błąd a ty stracisz tylko czas";
+			return false;
+	    } else {
+	    	return true;
+	    }	}
+	
 
-	<form action="#" method="post" enctype="multipart/form-data" >
-		{% csrf_token %} {{ form.as_p }} <input type="submit" value="Dodaj plik" onclick="checkSize();"/>
+</script>
+	<p id="sizeError" style="color:red"></p>
+	<form action="#" method="post" enctype="multipart/form-data"  onsubmit="return checkSize();" >
+		{% csrf_token %} {{ form.as_p }} <input type="submit" value="Dodaj plik"/>
 	</form>
 </div>
 {% endblock %}

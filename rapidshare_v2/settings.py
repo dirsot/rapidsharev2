@@ -37,6 +37,17 @@ DATABASES = {
     }
 }
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'mysql',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+#        'NAME': 'dirsot_rap',  # Or path to database file if using sqlite3.
+#        'USER': 'dirsot',  # Not used with sqlite3.
+#        'PASSWORD': '',  # Not used with sqlite3.
+#        'HOST': 'mysql2.alwaysdata.com',  # Set to empty string for localhost. Not used with sqlite3.
+#        'PORT': '',  # Set to empty string for default. Not used with sqlite3.
+#    }
+#}
+
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -148,7 +159,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'rapidshare_v2',
-    'captcha'
+    #'captcha'
 )
 
 # A sample logging configuration. The only tangible logging
