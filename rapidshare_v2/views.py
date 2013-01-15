@@ -164,7 +164,7 @@ def more(request, fileCode):
 	try:
 		userFile = File.objects.get(code=fileCode)
 		if request.user.is_anonymous():
-			if userFile.visibility == FILE_LINK:
+			if userFile.visibility == FILE_LINK or userFile.visibility == FILE_DEFAULT:
 				pass  # jest ok
 			else:
 				return render_to_response('error.html', {'msg':'nie ma dla ciebie pliku'}, context_instance=RequestContext(request))
